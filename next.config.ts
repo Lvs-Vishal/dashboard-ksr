@@ -15,6 +15,14 @@ const nextConfig: NextConfig = {
         source: "/api/guardian/stats",
         destination: "http://192.168.4.1/stats",
       },
+      {
+        source: "/api/thermostat/state",
+        destination: "http://192.168.4.160/",
+      },
+      {
+        source: "/api/thermostat/set",
+        destination: "http://192.168.4.160/set",
+      },
     ];
   },
 };

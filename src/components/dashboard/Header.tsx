@@ -32,7 +32,7 @@ export default function Header() {
           ) : (
             <Shield className="w-8 h-8" />
           )}
-          <span>A.E.G.I.S.</span>
+          <span>Neura Sparks</span>
         </div>
         <div className="h-6 w-px bg-white/20 mx-2" />
         <span className="text-xs text-neutral-400 tracking-wider">

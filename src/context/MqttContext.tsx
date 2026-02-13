@@ -297,13 +297,56 @@ export const MqttProvider = ({ children }: { children: ReactNode }) => {
       }
     };
 
+    // Poll Thermostat (192.168.4.160)
+    const fetchThermostat = async () => {
+      try {
+        const res = await fetch("/api/thermostat/state");
+        if (res.ok) {
+          const text = await res.text();
+
+          // Basic HTML parsing since the device returns HTML
+          const realMatch = text.match(/Real Temp: <b>([\d.]+) C<\/b>/);
+          const targetMatch = text.match(/Target Temp: <b>(\d+) C<\/b>/);
+          const attacked = text.includes("WARNING: SYSTEM COMPROMISED");
+
+          if (realMatch && targetMatch) {
+            const temp = parseFloat(realMatch[1]);
+            const target = parseInt(targetMatch[1]);
+
+            setNodes((prev) => ({
+              ...prev,
+              "node-a": {
+                ...prev["node-a"],
+                status: attacked ? "COMPROMISED" : "ONLINE",
+                lastSeen: Date.now(),
+                data: {
+                  ...prev["node-a"].data,
+                  temp,
+                  target,
+                },
+              },
+            }));
+
+            if (attacked) {
+              setThreatLevel("HIGH");
+            }
+          }
+        }
+      } catch (e) {
+        // Silent fail
+      }
+    };
+
     fetchStatus();
     fetchStats();
+    fetchThermostat();
 
     // Status polling
     const statusInterval = setInterval(fetchStatus, 2000);
     // Stats polling (faster for graph smoothness)
     const statsInterval = setInterval(fetchStats, 1000);
+    // Thermostat polling
+    const thermoInterval = setInterval(fetchThermostat, 2000);
 
     // Server-Sent Events for real-time events (attacks/blocks)
     let eventSource: EventSource | null = null;
@@ -380,6 +423,7 @@ export const MqttProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       clearInterval(statusInterval);
       clearInterval(statsInterval);
+      clearInterval(thermoInterval);
       eventSource?.close();
       clearTimeout(retryTimeout);
     };
