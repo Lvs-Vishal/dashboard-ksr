@@ -30,6 +30,8 @@ const AuthLogItem = ({ event }: { event: AuthEvent }) => {
         return <ShieldBan className="w-4 h-4 text-red-500 animate-pulse" />;
       case "unblocked":
         return <LockOpen className="w-4 h-4 text-blue-500" />;
+      case "blocked":
+        return <ShieldBan className="w-4 h-4 text-red-500" />;
     }
   };
 
@@ -58,6 +60,12 @@ const AuthLogItem = ({ event }: { event: AuthEvent }) => {
         return (
           <span className="text-blue-400">
             Client automatically unblocked: {event.ip}
+          </span>
+        );
+      case "blocked":
+        return (
+          <span className="text-red-400 font-bold">
+            🚨 DEVICE MANUALLY BLOCKED: {event.ip}
           </span>
         );
     }

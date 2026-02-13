@@ -35,7 +35,7 @@ export interface AuthEvent {
   id: string;
   timestamp: number;
   ip: string;
-  status: "success" | "failed" | "brute_force" | "unblocked";
+  status: "success" | "failed" | "brute_force" | "unblocked" | "blocked";
   attempt?: number;
 }
 
@@ -50,6 +50,7 @@ interface MqttContextType {
   resetSimulation: () => void;
   isGuardianNetwork: boolean;
   guardianStatus: GuardianStatus | null;
+  reportDevice: (ip: string, status: "blocked" | "unblocked") => Promise<void>;
 }
 
 const MqttContext = createContext<MqttContextType | undefined>(undefined);
@@ -218,7 +219,7 @@ export const MqttProvider = ({ children }: { children: ReactNode }) => {
                 setAuthEvents((prev) => [newEvent, ...prev].slice(0, 100));
 
                 if (currentFailed > 3) {
-                  setThreatLevel("MEDIUM");
+                  setThreatLevel("HIGH");
                 }
               }
               // Log Success if attempts drop to 0 explicitly
@@ -384,7 +385,7 @@ export const MqttProvider = ({ children }: { children: ReactNode }) => {
                 data.payload.status === "failed" &&
                 data.payload.attempt > 3
               ) {
-                setThreatLevel("MEDIUM");
+                setThreatLevel("HIGH");
               }
             }
 
@@ -428,6 +429,21 @@ export const MqttProvider = ({ children }: { children: ReactNode }) => {
       clearTimeout(retryTimeout);
     };
   }, [isGuardianNetwork]);
+
+  const reportDevice = async (ip: string, status: "blocked" | "unblocked") => {
+    try {
+      const res = await fetch("/api/guardian/report", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `ip=${ip}&status=${status}`,
+      });
+      if (res.ok) {
+        console.log(`Device ${ip} reported as ${status}`);
+      }
+    } catch (e) {
+      console.error("Failed to report device", e);
+    }
+  };
 
   const handleMessage = useCallback((topic: string, payload: string) => {
     try {
@@ -562,6 +578,7 @@ export const MqttProvider = ({ children }: { children: ReactNode }) => {
         isGuardianNetwork,
         guardianStatus,
         authEvents,
+        reportDevice,
       }}
     >
       {children}

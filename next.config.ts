@@ -11,6 +11,11 @@ const nextConfig: NextConfig = {
         source: "/api/guardian/events",
         destination: "http://192.168.4.1/events",
       },
+
+      {
+        source: "/api/guardian/report",
+        destination: "http://192.168.4.1/report",
+      },
       {
         source: "/api/guardian/stats",
         destination: "http://192.168.4.1/stats",

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { NodeStatus, useMqtt } from "@/context/MqttContext";
+import { NodeStatus, useMqtt, AuthEvent } from "@/context/MqttContext";
 import { clsx } from "clsx";
 import {
   Thermometer,
@@ -12,6 +12,8 @@ import {
   Edit2,
   Check,
   X,
+  ShieldBan,
+  ShieldCheck,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -22,11 +24,21 @@ const iconMap = {
 };
 
 export default function NodeCard({ node }: { node: NodeStatus }) {
-  const { updateNodeIp } = useMqtt();
+  const { updateNodeIp, guardianStatus, reportDevice } = useMqtt();
   const Icon = iconMap[node.type];
   const isCompromised = node.status === "COMPROMISED";
+  const isBlocked = guardianStatus?.blocked_clients?.includes(node.ip);
   const [isEditing, setIsEditing] = React.useState(false);
   const [ip, setIp] = React.useState(node.ip);
+
+  const handleBlockToggle = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isBlocked) {
+      await reportDevice(node.ip, "unblocked");
+    } else {
+      await reportDevice(node.ip, "blocked");
+    }
+  };
 
   const handleSave = () => {
     updateNodeIp(node.id, ip);
@@ -46,7 +58,9 @@ export default function NodeCard({ node }: { node: NodeStatus }) {
         "relative p-4 rounded-xl border backdrop-blur-sm transition-all duration-300",
         isCompromised
           ? "bg-red-900/20 border-red-500/50 shadow-[0_0_15px_rgba(255,0,0,0.3)] animate-pulse"
-          : "bg-white/5 border-green-500/20 hover:border-green-500/50 hover:bg-white/10",
+          : isBlocked
+            ? "bg-orange-900/10 border-orange-500/30"
+            : "bg-white/5 border-green-500/20 hover:border-green-500/50 hover:bg-white/10",
       )}
     >
       {/* Header */}
@@ -101,15 +115,35 @@ export default function NodeCard({ node }: { node: NodeStatus }) {
           </div>
         </div>
 
-        <div
-          className={clsx(
-            "text-[10px] font-bold px-2 py-0.5 rounded border",
-            isCompromised
-              ? "border-red-500 text-red-500 bg-red-500/10"
-              : "border-green-500 text-green-500 bg-green-500/10",
-          )}
-        >
-          {node.status}
+        <div className="flex flex-col items-end gap-1">
+          <div
+            className={clsx(
+              "text-[10px] font-bold px-2 py-0.5 rounded border",
+              isCompromised
+                ? "border-red-500 text-red-500 bg-red-500/10"
+                : isBlocked
+                  ? "border-orange-500 text-orange-500 bg-orange-500/10"
+                  : "border-green-500 text-green-500 bg-green-500/10",
+            )}
+          >
+            {isBlocked ? "BLOCKED" : node.status}
+          </div>
+          <button
+            onClick={handleBlockToggle}
+            className={clsx(
+              "p-1.5 rounded-md border transition-all hover:scale-110",
+              isBlocked
+                ? "bg-green-500/10 border-green-500/30 text-green-500 hover:bg-green-500/20"
+                : "bg-red-500/10 border-red-500/30 text-red-500 hover:bg-red-500/20",
+            )}
+            title={isBlocked ? "Unblock Device" : "Report & Block Device"}
+          >
+            {isBlocked ? (
+              <ShieldCheck className="w-3.5 h-3.5" />
+            ) : (
+              <ShieldBan className="w-3.5 h-3.5" />
+            )}
+          </button>
         </div>
       </div>
 

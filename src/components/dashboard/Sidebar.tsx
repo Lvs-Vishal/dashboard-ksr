@@ -21,7 +21,8 @@ const navItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { resetSimulation, publish } = useMqtt();
+  const { resetSimulation, publish, threatLevel } = useMqtt();
+  const isCritical = threatLevel === "CRITICAL" || threatLevel === "HIGH";
 
   const handleAttack = (type: string) => {
     // Simulate an attack by publishing to a special topic or just updating local state for demo
@@ -51,7 +52,9 @@ export default function Sidebar() {
               className={clsx(
                 "flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group border border-transparent",
                 isActive
-                  ? "bg-green-500/10 text-green-500 border-green-500/30"
+                  ? isCritical
+                    ? "bg-red-500/10 text-red-500 border-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.2)]"
+                    : "bg-green-500/10 text-green-500 border-green-500/30"
                   : "text-neutral-400 hover:text-white hover:bg-white/5",
               )}
             >

@@ -22,12 +22,12 @@ export default function Header() {
         <div
           className={clsx(
             "flex items-center gap-2 font-bold tracking-widest text-xl",
-            threatLevel === "CRITICAL"
+            threatLevel === "CRITICAL" || threatLevel === "HIGH"
               ? "text-red-500 animate-pulse"
               : "text-green-500",
           )}
         >
-          {threatLevel === "CRITICAL" ? (
+          {threatLevel === "CRITICAL" || threatLevel === "HIGH" ? (
             <ShieldAlert className="w-8 h-8" />
           ) : (
             <Shield className="w-8 h-8" />
@@ -46,15 +46,17 @@ export default function Header() {
           <Activity
             className={clsx(
               "w-4 h-4",
-              threatLevel === "CRITICAL" ? "text-red-500" : "text-green-500",
+              threatLevel === "CRITICAL" || threatLevel === "HIGH"
+                ? "text-red-500"
+                : "text-green-500",
             )}
           />
           <span
             className={clsx(
               "text-sm font-mono font-bold",
-              threatLevel === "CRITICAL"
+              threatLevel === "CRITICAL" || threatLevel === "HIGH"
                 ? "text-red-500"
-                : threatLevel === "HIGH"
+                : threatLevel === "MEDIUM"
                   ? "text-orange-500"
                   : "text-green-500",
             )}

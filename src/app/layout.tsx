@@ -3,6 +3,7 @@ import "./globals.css";
 import { MqttProvider } from "@/context/MqttContext";
 import Header from "@/components/dashboard/Header";
 import Sidebar from "@/components/dashboard/Sidebar";
+import ThemedLayout from "@/components/dashboard/ThemedLayout";
 
 export const metadata: Metadata = {
   title: "A.E.G.I.S. | Active Defense System",
@@ -18,11 +19,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="bg-black text-white min-h-screen">
         <MqttProvider>
-          <div className="min-h-screen flex flex-col relative overflow-hidden">
-            {/* Background Effects */}
-            <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-green-900/10 via-black to-black pointer-events-none z-0" />
-            <div className="scanline" />
-
+          <ThemedLayout>
             <Header />
 
             <div className="flex flex-1 relative z-10">
@@ -31,7 +28,7 @@ export default function RootLayout({
                 {children}
               </main>
             </div>
-          </div>
+          </ThemedLayout>
         </MqttProvider>
       </body>
     </html>
