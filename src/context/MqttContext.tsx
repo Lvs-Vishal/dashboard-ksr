@@ -63,6 +63,7 @@ export const MqttProvider = ({ children }: { children: ReactNode }) => {
   );
   const [authEvents, setAuthEvents] = useState<AuthEvent[]>([]);
   const prevBlockedClientsRef = useRef<Set<string>>(new Set());
+  const prevFailedAttemptsRef = useRef<Map<string, number>>(new Map());
 
   const [nodes, setNodes] = useState<Record<string, NodeStatus>>({
     "node-a": {
@@ -200,11 +201,47 @@ export const MqttProvider = ({ children }: { children: ReactNode }) => {
                 setThreatLevel("CRITICAL");
               }
 
-              // 2. Synthetic check for Failed Attempts (if client info exposes it, or implied)
-              // Since your provided C++ code doesn't expose `failedAttempts` in /stats JSON,
-              // we can only reliably detect the BLOCK state here.
-              // However, if you update the C++ to include "failedAttempts" in the JSON,
-              // we could track it here.
+              // 2. Real check for Failed Attempts (If C++ code provides `failedAttempts`)
+              const prevFailed =
+                prevFailedAttemptsRef.current.get(client.ip) || 0;
+              const currentFailed = (client as any).failedAttempts || 0;
+
+              // Log if count INCREASED (real new attempt)
+              if (currentFailed > 0 && currentFailed !== prevFailed) {
+                const newEvent: AuthEvent = {
+                  id: Math.random().toString(36).substr(2, 9),
+                  timestamp: Date.now(),
+                  ip: client.ip,
+                  status: "failed",
+                  attempt: currentFailed,
+                };
+                setAuthEvents((prev) => [newEvent, ...prev].slice(0, 100));
+
+                if (currentFailed > 3) {
+                  setThreatLevel("MEDIUM");
+                }
+              }
+              // Log Success if attempts drop to 0 explicitly
+              else if (
+                prevFailed > 0 &&
+                currentFailed === 0 &&
+                !client.blocked
+              ) {
+                const newEvent: AuthEvent = {
+                  id: Math.random().toString(36).substr(2, 9),
+                  timestamp: Date.now(),
+                  ip: client.ip,
+                  status: "success",
+                };
+                setAuthEvents((prev) => [newEvent, ...prev].slice(0, 100));
+
+                if (threatLevel === "MEDIUM") {
+                  setThreatLevel("LOW");
+                }
+              }
+
+              // Always update ref to current truth
+              prevFailedAttemptsRef.current.set(client.ip, currentFailed);
             });
           }
 
