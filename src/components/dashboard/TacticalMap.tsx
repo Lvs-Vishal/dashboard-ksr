@@ -4,7 +4,6 @@ import React from "react";
 import { useMqtt } from "@/context/MqttContext";
 import NodeCard from "@/components/widgets/NodeCard";
 import TrafficGraph from "@/components/widgets/TrafficGraph";
-import ThreatAlert from "./ThreatAlert";
 import { Shield, Server, Activity } from "lucide-react";
 
 export default function TacticalMap() {
@@ -15,8 +14,6 @@ export default function TacticalMap() {
 
   return (
     <div className="space-y-6 h-full flex flex-col">
-      <ThreatAlert />
-
       {/* Top Section: Guardian Status & Traffic */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-1/2">
         {/* Guardian Unit Status */}

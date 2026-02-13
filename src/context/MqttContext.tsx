@@ -179,15 +179,6 @@ export const MqttProvider = ({ children }: { children: ReactNode }) => {
               ...currentStatus,
               requests_per_sec: totalPackets,
               blocked_clients: blocked,
-              last_event:
-                blocked.length > 0
-                  ? `Blocking attack from ${blocked[0]}...`
-                  : currentStatus.last_event || "Monitoring network traffic...",
-              uptime_sec: currentStatus.uptime_sec,
-              total_attacks: Math.max(
-                currentStatus.total_attacks,
-                blocked.length > 0 ? 1 : 0,
-              ),
             };
           });
 
