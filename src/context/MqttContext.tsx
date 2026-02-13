@@ -31,11 +31,20 @@ export interface GuardianStatus {
   blocked_clients: string[];
 }
 
+export interface AuthEvent {
+  id: string;
+  timestamp: number;
+  ip: string;
+  status: "success" | "failed" | "brute_force" | "unblocked";
+  attempt?: number;
+}
+
 interface MqttContextType {
   status: "CONNECTING" | "CONNECTED" | "DISCONNECTED" | "RECONNECTING";
   threatLevel: ThreatLevel;
   nodes: Record<string, NodeStatus>;
   trafficData: { time: string; packets: number; type: string }[];
+  authEvents: AuthEvent[];
   publish: (topic: string, message: string) => void;
   updateNodeIp: (id: string, ip: string) => void;
   resetSimulation: () => void;
@@ -52,6 +61,8 @@ export const MqttProvider = ({ children }: { children: ReactNode }) => {
   const [guardianStatus, setGuardianStatus] = useState<GuardianStatus | null>(
     null,
   );
+  const [authEvents, setAuthEvents] = useState<AuthEvent[]>([]);
+  const prevBlockedClientsRef = useRef<Set<string>>(new Set());
 
   const [nodes, setNodes] = useState<Record<string, NodeStatus>>({
     "node-a": {
@@ -163,6 +174,56 @@ export const MqttProvider = ({ children }: { children: ReactNode }) => {
             return newData.slice(-50);
           });
 
+          // Check for new auth events in stats polling as fallback/confirmation
+          const currentBlockedIPs = new Set<string>();
+
+          if (data.clients) {
+            data.clients.forEach((client: any) => {
+              // 1. Check for Blocked Status (Brute Force)
+              if (client.blocked) {
+                currentBlockedIPs.add(client.ip);
+
+                if (!prevBlockedClientsRef.current.has(client.ip)) {
+                  const newEvent: AuthEvent = {
+                    id: Math.random().toString(36).substr(2, 9),
+                    timestamp: Date.now(),
+                    ip: client.ip,
+                    status: "brute_force",
+                  };
+                  setAuthEvents((prev) => [newEvent, ...prev].slice(0, 100));
+                  setThreatLevel("CRITICAL");
+                }
+              }
+
+              // Also ensure we stay in CRITICAL if any client is blocked
+              if (currentBlockedIPs.size > 0) {
+                setThreatLevel("CRITICAL");
+              }
+
+              // 2. Synthetic check for Failed Attempts (if client info exposes it, or implied)
+              // Since your provided C++ code doesn't expose `failedAttempts` in /stats JSON,
+              // we can only reliably detect the BLOCK state here.
+              // However, if you update the C++ to include "failedAttempts" in the JSON,
+              // we could track it here.
+            });
+          }
+
+          // Check for unblocks (was in ref, not in current)
+          prevBlockedClientsRef.current.forEach((ip) => {
+            if (!currentBlockedIPs.has(ip)) {
+              const newEvent: AuthEvent = {
+                id: Math.random().toString(36).substr(2, 9),
+                timestamp: Date.now(),
+                ip: ip,
+                status: "unblocked",
+              };
+              setAuthEvents((prev) => [newEvent, ...prev].slice(0, 100));
+            }
+          });
+
+          // Update ref for next poll
+          prevBlockedClientsRef.current = currentBlockedIPs;
+
           // Update Guardian Status derived from stats
           setGuardianStatus((prev) => {
             const currentStatus = prev || {
@@ -189,7 +250,8 @@ export const MqttProvider = ({ children }: { children: ReactNode }) => {
             setThreatLevel("HIGH");
           } else if (totalPackets > 50) {
             setThreatLevel("MEDIUM");
-          } else {
+          } else if (threatLevel !== "CRITICAL") {
+            // Only lower if not already critical from an event
             setThreatLevel("LOW");
           }
         }
@@ -222,6 +284,29 @@ export const MqttProvider = ({ children }: { children: ReactNode }) => {
         eventSource.onmessage = (event) => {
           try {
             const data = JSON.parse(event.data);
+
+            // Handle Auth Events
+            if (data.type === "auth" && data.payload) {
+              const newEvent: AuthEvent = {
+                id: Math.random().toString(36).substr(2, 9),
+                timestamp: Date.now(),
+                ip: data.payload.ip,
+                status: data.payload.status,
+                attempt: data.payload.attempt,
+              };
+
+              setAuthEvents((prev) => [newEvent, ...prev].slice(0, 100)); // Keep last 100
+
+              // Trigger Threat Level Changes based on Auth Events
+              if (data.payload.status === "brute_force") {
+                setThreatLevel("CRITICAL");
+              } else if (
+                data.payload.status === "failed" &&
+                data.payload.attempt > 3
+              ) {
+                setThreatLevel("MEDIUM");
+              }
+            }
 
             // If SSE sends status updates, we can update status
             if (data.requests_per_sec !== undefined) {
@@ -395,6 +480,7 @@ export const MqttProvider = ({ children }: { children: ReactNode }) => {
         resetSimulation,
         isGuardianNetwork,
         guardianStatus,
+        authEvents,
       }}
     >
       {children}

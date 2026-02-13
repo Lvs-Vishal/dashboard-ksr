@@ -5,6 +5,7 @@ import { useMqtt } from "@/context/MqttContext";
 import NodeCard from "@/components/widgets/NodeCard";
 import TrafficGraph from "@/components/widgets/TrafficGraph";
 import { Shield, Server, Activity } from "lucide-react";
+import BruteForceMonitor from "@/components/widgets/BruteForceMonitor";
 
 export default function TacticalMap() {
   const { nodes, threatLevel, guardianStatus } = useMqtt();
@@ -87,10 +88,10 @@ export default function TacticalMap() {
       </div>
 
       {/* Middle Section: Connected Victim Nodes */}
-      <div className="flex-1">
+      <div className="">
         <h2 className="text-sm font-bold text-neutral-500 mb-4 tracking-widest flex items-center gap-2">
           <Activity className="w-4 h-4" />
-          NETWORK TOPOLOGY / VICTIM SIMULATION
+          NETWORK TOPOLOGY
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -98,6 +99,11 @@ export default function TacticalMap() {
             <NodeCard key={node.id} node={node} />
           ))}
         </div>
+      </div>
+
+      {/* Bottom Section: Brute Force Logs */}
+      <div className="flex-1 min-h-[300px]">
+        <BruteForceMonitor />
       </div>
     </div>
   );
