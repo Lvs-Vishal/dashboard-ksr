@@ -144,6 +144,12 @@ export const MqttProvider = ({ children }: { children: ReactNode }) => {
               0,
             ) || 0;
 
+          // Find blocked clients
+          const blockedClients = data.clients
+            ?.filter((c: any) => c.blocked)
+            .map((c: any) => c.ip);
+
+          // Update Traffic Graph
           setTrafficData((prev) => {
             const timeStr = new Date().toLocaleTimeString();
             const newData = [
@@ -156,6 +162,45 @@ export const MqttProvider = ({ children }: { children: ReactNode }) => {
             ];
             return newData.slice(-50);
           });
+
+          // Update Guardian Status derived from stats
+          setGuardianStatus((prev) => {
+            const currentStatus = prev || {
+              requests_per_sec: 0,
+              total_attacks: 0,
+              last_event: "Initializing...",
+              uptime_sec: 0,
+              blocked_clients: [],
+            };
+
+            const blocked = blockedClients || [];
+
+            return {
+              ...currentStatus,
+              requests_per_sec: totalPackets,
+              blocked_clients: blocked,
+              last_event:
+                blocked.length > 0
+                  ? `Blocking attack from ${blocked[0]}...`
+                  : currentStatus.last_event || "Monitoring network traffic...",
+              uptime_sec: currentStatus.uptime_sec,
+              total_attacks: Math.max(
+                currentStatus.total_attacks,
+                blocked.length > 0 ? 1 : 0,
+              ),
+            };
+          });
+
+          // Update Threat Level
+          if (blockedClients && blockedClients.length > 0) {
+            setThreatLevel("CRITICAL");
+          } else if (totalPackets > 100) {
+            setThreatLevel("HIGH");
+          } else if (totalPackets > 50) {
+            setThreatLevel("MEDIUM");
+          } else {
+            setThreatLevel("LOW");
+          }
         }
       } catch (e) {
         // Silent failure
