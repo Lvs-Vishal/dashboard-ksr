@@ -15,8 +15,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const navItems = [
-  { name: "CONTROL CENTER", icon: LayoutDashboard, path: "/" },
-  { name: "TACTICAL MAP", icon: Map, path: "/tactical" },
+  { name: "CONTROL CENTER", icon: LayoutDashboard, path: "/dashboard" },
+  { name: "TACTICAL MAP", icon: Map, path: "/dashboard/tactical" },
 ];
 
 export default function Sidebar() {
