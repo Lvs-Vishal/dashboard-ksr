@@ -4,6 +4,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Box, Shield, Zap } from "lucide-react";
 import Link from "next/link";
+import Aurora from "../../components/Aurora";
 
 function FloatingParticle({
   delay,
@@ -39,23 +40,28 @@ export default function Hero() {
   return (
     <section className="relative min-h-screen flex items-center pt-20 overflow-hidden bg-[var(--color-dark-bg)]">
       {/* Background Effects */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-[var(--color-neon-purple)] rounded-full mix-blend-screen filter blur-[120px] opacity-20 animate-pulse" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-[var(--color-neon-blue)] rounded-full mix-blend-screen filter blur-[150px] opacity-20" />
-        <div className="absolute top-[40%] left-[50%] transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-[var(--color-neon-cyan)] rounded-full mix-blend-screen filter blur-[180px] opacity-10" />
+      <div className="absolute inset-0 z-0 opacity-50">
+        <Aurora
+          colorStops={["#00f3ff", "#0066ff", "#bc13fe"]}
+          amplitude={1.2}
+          blend={0.5}
+          speed={0.5}
+        />
+      </div>
 
+      <div className="absolute inset-0 z-0 pointer-events-none">
         {/* Grid Overlay */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px] [mask-image:radial-gradient(ellipse_at_center,black_50%,transparent_100%)]" />
       </div>
 
       {/* Floating Particles */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
+      {/* <div className="absolute inset-0 z-0 pointer-events-none">
         <FloatingParticle delay={0} x="10%" y="20%" />
         <FloatingParticle delay={2} x="80%" y="15%" />
         <FloatingParticle delay={1} x="15%" y="80%" />
         <FloatingParticle delay={3} x="85%" y="75%" />
         <FloatingParticle delay={1.5} x="50%" y="50%" />
-      </div>
+      </div> */}
 
       <div className="container mx-auto px-6 relative z-10 text-center">
         <motion.div
@@ -122,47 +128,7 @@ export default function Hero() {
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.8 }}
           className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto"
-        >
-          {[
-            {
-              icon: Shield,
-              title: "Security First",
-              desc: "Zero-trust architecture with automated policy enforcement.",
-              color: "var(--color-neon-purple)",
-            },
-            {
-              icon: Zap,
-              title: "High Performance",
-              desc: "<5ms latency processing for real-time edge workloads.",
-              color: "var(--color-neon-cyan)",
-            },
-            {
-              icon: Box,
-              title: "Modular Core",
-              desc: "Composable infrastructure that adapts to your stack.",
-              color: "var(--color-neon-blue)",
-            },
-          ].map((feature, i) => (
-            <div
-              key={i}
-              className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 transition-colors backdrop-blur-sm group"
-            >
-              <div
-                className="w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300"
-                style={{ backgroundColor: `${feature.color}20` }}
-              >
-                <feature.icon
-                  className="w-6 h-6"
-                  style={{ color: feature.color }}
-                />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">
-                {feature.title}
-              </h3>
-              <p className="text-gray-400">{feature.desc}</p>
-            </div>
-          ))}
-        </motion.div>
+        ></motion.div>
       </div>
     </section>
   );

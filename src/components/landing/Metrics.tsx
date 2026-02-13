@@ -49,9 +49,9 @@ export default function Metrics() {
   return (
     <section className="py-24 bg-[#050505] relative overflow-hidden">
       <div className="container mx-auto px-6">
-        <div className="flex flex-col lg:flex-row gap-12 items-center">
+        <div className="flex flex-col lg:flex-row gap-6 items-stretch">
           {/* Metrics Grid */}
-          <div className="grid grid-cols-2 gap-4 w-full lg:w-1/2">
+          <div className="grid grid-cols-2 gap-4 w-full lg:w-[40%]">
             <MetricCard
               label="Active Nodes"
               value="12,408"
@@ -79,7 +79,7 @@ export default function Metrics() {
           </div>
 
           {/* Live Graph Simulation */}
-          <div className="w-full lg:w-1/2 bg-white/5 border border-white/10 rounded-2xl p-6 relative overflow-hidden h-[300px] flex flex-col">
+          <div className="w-full lg:w-[60%] bg-white/5 border border-white/10 rounded-2xl p-6 relative overflow-hidden min-h-[300px] flex flex-col">
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />

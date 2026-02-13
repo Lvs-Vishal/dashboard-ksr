@@ -1,108 +1,21 @@
 @import "tailwindcss";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #050505;
-  --foreground: #ededed;
+@custom-variant dark (&:is(.dark *));
 
-  --color-cyber-green: #00ff41;
-  --color-cyber-blue: #00b8ff;
-  --color-cyber-red: #ff003c;
-
-  /* Deep Tech Theme */
-  --color-neon-cyan: #00f3ff;
-  --color-neon-blue: #0066ff;
-  --color-neon-purple: #bc13fe;
-  --color-dark-bg: #050505;
-  --color-dark-surface: #0a0a0a;
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono:
+    var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, monospace;
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: "Courier New", Courier, monospace;
-  /* Fallback until fonts are loaded */
-  overflow-x: hidden;
-}
+/* ... keep :root ... */
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--background);
-}
-
-::-webkit-scrollbar-thumb {
-  background: #333;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-cyber-green);
-}
-
-@layer utilities {
-  .glass-panel {
-    @apply bg-white/10 backdrop-blur-md border border-white/10 shadow-lg;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
-
-  .cyber-border {
-    @apply border border-green-500/30;
-  }
-
-  .text-glow-green {
-    text-shadow: 0 0 10px rgba(0, 255, 65, 0.7);
-  }
-
-  .text-glow-red {
-    text-shadow: 0 0 10px rgba(255, 0, 60, 0.7);
-  }
-
-  .text-glow-blue {
-    text-shadow: 0 0 10px rgba(0, 184, 255, 0.7);
-  }
-
-  .text-glow-cyan {
-    text-shadow: 0 0 15px rgba(0, 243, 255, 0.6);
-  }
-
-  .text-glow-purple {
-    text-shadow: 0 0 15px rgba(188, 19, 254, 0.6);
-  }
-
-  .subtle-grid {
-    background-size: 50px 50px;
-    background-image:
-      linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-    mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
-  }
-
-  .scanline {
-    width: 100%;
-    height: 100px;
-    z-index: 10;
-    background: linear-gradient(
-      0deg,
-      rgba(0, 0, 0, 0) 0%,
-      rgba(0, 255, 65, 0.04) 50%,
-      rgba(0, 0, 0, 0) 100%
-    );
-    opacity: 0.1;
-    position: absolute;
-    bottom: 100%;
-    animation: scanline 10s linear infinite;
-    pointer-events: none;
-  }
-
-  @keyframes scanline {
-    0% {
-      bottom: 100%;
-    }
-
-    100% {
-      bottom: -100px;
-    }
+  body {
+    @apply bg-background text-foreground;
   }
 }

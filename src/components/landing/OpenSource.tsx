@@ -14,7 +14,7 @@ export default function OpenSource() {
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="text-4xl md:text-5xl font-bold text-white mb-8"
+              className="text-4xl md:text-5xl leading-normal font-bold text-white mb-8"
             >
               Open Core.
               <br />
